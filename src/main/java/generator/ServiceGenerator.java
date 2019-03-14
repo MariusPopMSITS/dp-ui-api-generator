@@ -1,3 +1,7 @@
+package generator;
+
+import service.DateUtilsService;
+
 import java.io.BufferedWriter;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -20,8 +24,9 @@ public class ServiceGenerator {
                 "\n" +
                 "/**\n" +
                 " * Service class for "+entity+".\n" +
+                " *\n"+
                 " * @author "+author+"\n" +
-                " * @since "+dtf.format(localDate)+"\n" +
+                " * @since "+ DateUtilsService.formatMonth(dtf.format(localDate))+"\n" +
                 " */\n" +
                 "@Service\n" +
                 "public class "+entity+"Service {\n" +

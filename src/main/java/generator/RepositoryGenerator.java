@@ -1,3 +1,7 @@
+package generator;
+
+import service.DateUtilsService;
+
 import java.io.BufferedWriter;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -16,12 +20,11 @@ public class RepositoryGenerator {
                 "import org.springframework.data.jpa.repository.JpaRepository;\n" +
                 "import org.springframework.stereotype.Repository;\n" +
                 "\n" +
-                "import java.util.List;\n" +
-                "\n" +
                 "/**\n" +
                 " * Spring Data JPA repository for the "+entity+".\n" +
+                " *\n"+
                 " * @author "+author+"\n" +
-                " * @since "+dtf.format(localDate)+"\n" +
+                " * @since "+ DateUtilsService.formatMonth(dtf.format(localDate))+"\n" +
                 " */\n" +
                 "@SuppressWarnings(\"unused\")\n" +
                 "@Repository\n" +

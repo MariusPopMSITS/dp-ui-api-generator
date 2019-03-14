@@ -1,3 +1,6 @@
+import generator.*;
+import service.StringFormatService;
+
 import java.awt.*;
 import java.awt.event.*;
 import java.io.IOException;
@@ -6,10 +9,13 @@ import javax.swing.border.*;
 
 public class Main extends JDialog {
 
-    private JTextField pfPassword;
+    private JComboBox pfPassword;
     private JTextField tfUsername;
+    private JTextField txAttribute;
     private JLabel lbUsername;
     private JLabel lbPassword;
+    private JLabel lbAttribute;
+    private JComboBox CmTypes;
     private JButton btnLogin;
     private JButton btnCancel;
     private boolean succeeded;
@@ -19,7 +25,8 @@ public class Main extends JDialog {
         //
         JPanel panel = new JPanel(new GridBagLayout());
         GridBagConstraints cs = new GridBagConstraints();
-
+        String[] types = { "String", "Long", "Boolean"};
+        String[] authors = { "Stelian Galmati", "Marius Pop"};
         cs.fill = GridBagConstraints.HORIZONTAL;
 
         lbUsername = new JLabel("Entity Name: ");
@@ -40,11 +47,31 @@ public class Main extends JDialog {
         cs.gridwidth = 1;
         panel.add(lbPassword, cs);
 
-        pfPassword = new JTextField(20);
+        pfPassword = new JComboBox(authors);
         cs.gridx = 1;
         cs.gridy = 1;
         cs.gridwidth = 2;
         panel.add(pfPassword, cs);
+        panel.setBorder(new LineBorder(Color.GRAY));
+
+        lbAttribute = new JLabel("Attribute: ");
+        cs.gridx = 0;
+        cs.gridy = 2;
+        cs.gridwidth = 1;
+        panel.add(lbAttribute, cs);
+
+        txAttribute = new JTextField(20);
+        cs.gridx = 1;
+        cs.gridy = 2;
+        cs.gridwidth = 2;
+        panel.add(txAttribute, cs);
+        panel.setBorder(new LineBorder(Color.GRAY));
+
+        CmTypes = new JComboBox(types);
+        cs.gridx = 3;
+        cs.gridy = 2;
+        cs.gridwidth = 2;
+        panel.add(CmTypes, cs);
         panel.setBorder(new LineBorder(Color.GRAY));
 
         btnLogin = new JButton("GenerateAPI");
@@ -54,68 +81,24 @@ public class Main extends JDialog {
             public void actionPerformed(ActionEvent e){
 
                 String entity = tfUsername.getText();
-                String withoutLast = entity.substring(0,entity.length()-1);
-                String getAllVariable="";
-                if (entity.endsWith("s") ||
-                        entity.endsWith("ss") ||
-                        entity.endsWith("sh") ||
-                        entity.endsWith("ch") ||
-                        entity.endsWith("x") ||
-                        entity.endsWith("z")) {
-                    getAllVariable = entity + "es";
-                }
-                else {
-                    if (entity.endsWith("y")) {
-                        getAllVariable = withoutLast + "ies";
-                    }else {
-                        getAllVariable = entity + "s";
-                    }
-
-                }
-
                 String variable = entity.substring(0, 1).toLowerCase() + entity.substring(1);
-                String author = pfPassword.getText();
-                String s = MainGenerator.generateDb(entity);
-                String apiName = MainGenerator.generateApiName(entity);
-
-                String a = s.replace(",","");
-                String b=  a.replace("[","");
-                String c = b.replace("]","");
-                String d = c.replaceAll("\\s","");
-
-                String ap = apiName.replace(",","");
-                String bp=  ap.replace("[","");
-                String cp = bp.replace("]","");
-                String dp = cp.replaceAll("\\s","");
-
-                String entityFinal = "";
-
-                if (dp.endsWith("s") ||
-                        dp.endsWith("ss") ||
-                        dp.endsWith("sh") ||
-                        dp.endsWith("ch") ||
-                        dp.endsWith("x") ||
-                        dp.endsWith("z")) {
-                    entityFinal = dp + "es";
-                }
-                else {
-                    if (dp.endsWith("y")) {
-                        entityFinal = String.valueOf(dp.substring(0,dp.length()-1)).toLowerCase()+"ies";
-                    }else {
-                        entityFinal = dp + "s";
-                    }
-                }
+                String author = pfPassword.getSelectedItem().toString();
                 try {
-                    EntityGenerator.usingBufferedWritter(entity,d,author);
+                    String attribute = txAttribute.getText();
+                    String type = CmTypes.getSelectedItem().toString();
+
+                    EntityGenerator.usingBufferedWritter(entity,StringFormatService.formatDb(entity),author, type, attribute);
                     RepositoryGenerator.usingBufferedWritter(entity,author);
                     ServiceGenerator.usingBufferedWritter(entity, variable,author);
-                    ResourceGenerator.usingBufferedWritter(entity, variable, entityFinal,author, getAllVariable);
-
+                    ResourceGenerator.usingBufferedWritter(entity, variable, StringFormatService.adjustPlural(StringFormatService.adjustDatabaseFormat(entity)),author, StringFormatService.adjustPlural(entity));
+                    ResourceIntTestGenerator.usingBufferedWritter(entity, StringFormatService.formatDb(entity), author, type, attribute, variable, StringFormatService.adjustPlural(StringFormatService.adjustDatabaseFormat(entity)));
                     JOptionPane.showMessageDialog(Main.this,
                             "Api generated successfully ");                } catch (IOException e1) {
                     e1.printStackTrace();
                 }
                 }
+
+
         });
         btnCancel = new JButton("Cancel");
         btnCancel.addActionListener(new ActionListener() {
